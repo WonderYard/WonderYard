@@ -1,106 +1,110 @@
-function Automaton(data) {
-  // TODO valida la struttura dati prima di assegnarla a this.data 
-  this.data = data;
-  this.grid = [];
-  this.nbhd = {
-    "nbhd_id": "Moore",
-    "rel_cells": [
-      {x:-1,y:-1}, {x:-1,y: 0}, {x:-1,y: 1},
-      {x: 0,y:-1},              {x: 0,y: 1},
-      {x: 1,y:-1}, {x: 1,y: 0}, {x: 1,y: 1}
-    ]
-  };
-  this.x;
-  this.y;
-}
+var Automaton = require("./automaton").Automaton;
+var Grid = require("./grid").Grid;
 
-Automaton.prototype.evolve = function() {
-    var newGrid = [];
-    
-    for(this.y = 0; this.y < this.grid.length; this.y++) {
-      newGrid.push([]);
-      for(this.x = 0; this.x < this.grid[this.y].length; this.x++) {
-        var currCell = this.getCell(this.x, this.y);
-        var state = this.data.states[currCell]; // getter method
-        var i;
-        for(i = 0; i < state.rules.length; i++) {
-          var rule = state.rules[i];
-          if(this.evalBoolExpr(rule.conditions)) {
-            newGrid.push(rule.evolve_to);
-            break;
+var data = JSON.parse(`{
+  "states": [
+    {
+      "state_id": 0,
+      "color": "#000",
+      "rules": [
+        {
+          "evolve_to": 1,
+          "conditions": {
+            "subexp": {
+              "operator": "AND",
+              "right_chd": {
+                "term": {
+                  "cond": {
+                    "adjacency": {
+                      "ref_to_count": {
+                        "state_ref": {
+                          "state_id": 1
+                        }
+                      },
+                      "min": 3,
+                      "max": 3
+                    }
+                  }
+                }
+              },
+              "left_chd": {
+                "term": {
+                  "bool_lit": true
+                }
+              }
+            }
           }
         }
-        if(i == state.rules.length) newGrid.push(currCell);
-      }
+      ]
+    },
+    {
+      "state_id": 1,
+      "color": "#FFF",
+      "rules": [
+        {
+          "evolve_to": 0,
+          "conditions": {
+            "subexp": {
+              "operator": "OR",
+              "right_chd": {
+                "term": {
+                  "cond": {
+                    "adjacency": {
+                      "ref_to_count": {
+                        "state_ref": {
+                          "state_id": 1
+                        }
+                      },
+                      "max": 1
+                    }
+                  }
+                }
+              },
+              "left_chd": {
+                "term": {
+                  "cond": {
+                    "adjacency": {
+                      "ref_to_count": {
+                        "state_ref": {
+                          "state_id": 1
+                        }
+                      },
+                      "min": 4
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
     }
-    
-    this.grid = newGrid;
-};
+  ]
+}`);
 
-Automaton.prototype.getCell = function(x, y) {
-  if(x >= 0 && x < this.grid[0].length && y >= 0 && y < this.grid.length) return this.grid[y][x];
-	return 0;
-};
+var ca = new Automaton(data);
 
-Automaton.prototype.evalBoolExpr = function(expr) {
-  function evalExTerm(exTerm) {
-    if(exTerm.bool_lit) return exTerm.bool_lit;
-    if(exTerm.cond) return evalCondition();
-    throw new Error("ExTerm: badly formatted");
-  }
-  
-  function evalCondition(condition) {
-    if(condition.adjacency) evalAdjacency(condition.adjacency);
-    if(condition.relational) throw new Error("Not implemented yet");
-  }
-  
-  function evalAdjacency(adjacency) {
-    var neighbors = {};
-    var nbhd = adjacency.in ? adjacency.in : this.nbhd;
-    for(var n = 0; n < nbhd.length; n++) {
-      var i = this.x + nbhd.rel_cells[n].x;
-      var j = this.y + nbhd.rel_cells[n].y;
-      
-      var currCell = this.getCell(this.x, this.y);
-      neighbors[currCell] = (neighbors[currCell] || 0) + 1;
-    }
-    
-    var cell = resolveRef(adjacency.ref_to_count);
-    var count = neighbors[cell] || 0;
-    var min = adjacency.min || 0;
-    var max = adjacency.max || +Infinity;
-    return count >= min && count <= max;
-  }
-  
-  function resolveRef(ref) {
-    if(ref.state_ref) return resolveStateRef(ref.state_ref);
-    if(ref.class_ref) throw new Error("Not implemented yet");
-    throw new Error("resolveRef: badly formatted");
-  }
-  
-  function resolveStateRef(stateRef) {
-    if(stateRef.state_id) return stateRef.state_id;
-    // ricorda problema del riferimento del "me" nel caso in cui evalBoolExpr è chiamato da una classe
-    // in quel caso la classe deve sapere lo stato chiamante
-    if(stateRef.me) return this.getCell(this.x, this.y);
-    if(stateRef.coordinate) return this.getCell(this.x + stateRef.coordinate.x, this.y + stateRef.coordinate.y);
-    throw new Error("resolveStateRef: badly formatted");
-  }
-  
+var grid = new Grid(data);
 
-  
-  function evalSubexpression(subexp) {
-    var right = this.evalBoolExpr(subexp.right_chd);
-    var left = this.evalBoolExpr(subexp.left_chd);
-    
-    if(subexp.operator == "AND") return right & left;
-    if(subexp.operator == "OR") return right | left;
-    if(subexp.operator == "XOR") return right ^ left;
-    throw new Error("Subexpression: unknown operator " + subexp.operator);
-  }
+var canvas = document.getElementById("canvas");
+var g = canvas.getContext("2d");
 
-  if(expr.term) return expr.negate ? ! evalExTerm(expr.term) : evalExTerm(expr.term);
-  if(expr.subexp) return expr.negate ? ! evalSubexpression(expr.subexp) : evalSubexpression(expr.subexp);
-  throw new Error("BoolExpr: badly formatted");
-  
-};
+grid.setCell(8, 10, 1);
+grid.setCell(9, 9, 1);
+grid.setCell(10, 9, 1);
+grid.setCell(11, 9, 1);
+grid.setCell(9, 10, 1);
+grid.setCell(11, 10, 1);
+grid.setCell(9, 11, 1);
+grid.setCell(10, 11, 1);
+grid.setCell(11, 11, 1);
+grid.setCell(12, 10, 1);
+
+
+grid.draw(canvas, g);
+
+
+window.tick = function() {
+  grid.setGrid(ca.evolve(grid));
+  grid.draw(canvas, g);
+}
