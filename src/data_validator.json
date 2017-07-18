@@ -1,5 +1,5 @@
 /**
-//Idea di classe che controlla la struttura datai strutturata come parser discendente
+//Idea di classe che controlla la struttura dati strutturata come parser discendente
 //https://code.tutsplus.com/tutorials/validating-data-with-json-schema-part-1--cms-25343
 function data_validator(data) {
     this.data = data;
@@ -126,7 +126,6 @@ data_validator.prototype.check = function() {
     "properties": {
         "cond": {
             "$ref": "#Condition"
-                
         },
         "bool_lit": {
             "type": "boolean"
@@ -177,7 +176,6 @@ data_validator.prototype.check = function() {
         },
         "class_ref": {
             "type": "integer"
-            
         }
     }
 }
@@ -190,9 +188,9 @@ data_validator.prototype.check = function() {
             "type": "integer"
         },
         "class_list": {
-            "type": "array",
+            "type": "integer",
             "items": {
-                "$ref": "#ClassDefn"
+                "type": "integer"
             }
         },
         "rules": {
@@ -286,7 +284,4 @@ data_validator.prototype.check = function() {
             }
         }
     }
-
-
-
 }
