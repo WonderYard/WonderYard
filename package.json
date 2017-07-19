@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
-  "devDependencies": {
-    "webpack": "^3.2.0",
-    "webpack-dev-server": "^2.5.1"
+  "devDependencies": {},
+  "dependencies": {
+    "ajv": "^5.2.2"
   }
 }
