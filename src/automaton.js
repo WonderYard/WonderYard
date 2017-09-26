@@ -1,49 +1,140 @@
-function Automaton(data) {
-  this.data = data;
-  this.nbhd = {
-    "nbhd_id": "Moore",
-    "rel_cells": [
-      {x:-1,y:-1}, {x:-1,y: 0}, {x:-1,y: 1},
-      {x: 0,y:-1},              {x: 0,y: 1},
-      {x: 1,y:-1}, {x: 1,y: 0}, {x: 1,y: 1}
-    ]
-  };
-  this.grid;
-  this.x;
-  this.y;
-}
-
-Automaton.prototype.evolve = function(grid) {
-  this.grid = grid;
-  
-  var newGrid = [];
-  for(var y = 0; y < grid.cols; y++) {
-    newGrid.push([]);
-    for(var x = 0; x < grid.rows; x++) {
-      newGrid[y].push(grid.getCell(x, y));
+class Automaton {
+  constructor(data) {
+    this.data = data || {
+  "classes": [],
+  "nbhds": [],
+  "states": [
+    {
+      "color": "#000",
+      "rules": [
+        {
+          "evolve_to": {
+            "state_id": 1
+          },
+          "conditions": {
+            "subexp": {
+              "operator": "AND",
+              "right_chd": {
+                "term": {
+                  "cond": {
+                    "adjacency": {
+                      "ref_to_count": {
+                        "state_ref": {
+                          "state_id": 1
+                        }
+                      },
+                      "min": 3,
+                      "max": 3
+                    }
+                  }
+                }
+              },
+              "left_chd": {
+                "term": {
+                  "bool_lit": true
+                }
+              }
+            }
+          }
+        }
+      ],
+      "class_list": []
+    },
+    {
+      "color": "#FFF",
+      "rules": [
+        {
+          "evolve_to": {
+            "state_id": 0
+          },
+          "conditions": {
+            "subexp": {
+              "operator": "OR",
+              "right_chd": {
+                "term": {
+                  "cond": {
+                    "adjacency": {
+                      "ref_to_count": {
+                        "state_ref": {
+                          "state_id": 1
+                        }
+                      },
+                      "max": 1
+                    }
+                  }
+                }
+              },
+              "left_chd": {
+                "term": {
+                  "cond": {
+                    "adjacency": {
+                      "ref_to_count": {
+                        "state_ref": {
+                          "state_id": 1
+                        }
+                      },
+                      "min": 4
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "class_list": []
     }
+  ]
+};
+    this.nbhd = {
+      "nbhd_id": "Moore",
+      "rel_cells": [
+        {x:-1,y:-1}, {x:-1,y: 0}, {x:-1,y: 1},
+        {x: 0,y:-1},              {x: 0,y: 1},
+        {x: 1,y:-1}, {x: 1,y: 0}, {x: 1,y: 1}
+      ]
+    };
+    this.grid;
+    this.newGrid = null;
+    this.x;
+    this.y;
   }
-  
-  for(this.y = 0; this.y < grid.cols; this.y++) {
-    for(this.x = 0; this.x < grid.rows; this.x++) {
-      var currCell = this.grid.getCell(this.x, this.y);
-      var state = this.data.states[currCell];
-      for(var i = 0; i < state.rules.length; i++) {
-        var rule = state.rules[i];
-        if(evalBoolExpr.call(this, rule.conditions)) {
-          newGrid[this.y][this.x] = resolveStateRef.call(this, rule.evolve_to);
-          break;
+
+  getColor(state) {
+    return this.data.states[state].color;
+  }
+
+  evolve(grid) {
+    this.grid = grid;
+
+    this.newGrid = this.newGrid || new Uint8Array(grid.cols * grid.rows);
+    
+    for(this.y = 0; this.y < grid.rows; this.y++) {
+      for(this.x = 0; this.x < grid.cols; this.x++) {
+        var currCell = this.grid.getCell(this.x, this.y);
+        var state = this.data.states[currCell];
+        for(var i = 0; i < state.rules.length; i++) {
+          var rule = state.rules[i];
+          if(evalBoolExpr.call(this, rule.conditions)) {
+            this.newGrid[this.x + grid.cols * this.y] = resolveStateRef.call(this, rule.evolve_to);
+            break;
+          }
+        }
+        if(i == state.rules.length) {
+          if(!applyClassRules.call(this, [], state)) {
+            this.newGrid[this.x + grid.cols * this.y] = currCell;
+          }
         }
       }
-      if(i == state.rules.length) {
-        applyClassRules.call(this, [], newGrid, state);
-      }
     }
+    var asd = this.grid._data;
+    this.grid._data = this.newGrid;
+    this.newGrid = asd;
+    return this.grid._data;
   }
-  return newGrid;
-};
+}
 
-function applyClassRules(visited_classes, newGrid, state) {
+function applyClassRules(visited_classes, state) {
   for(var c = 0; c < state.class_list.length; c++) {
     var class_id = state.class_list[c];
     var _class = this.data.classes[class_id];
@@ -52,14 +143,15 @@ function applyClassRules(visited_classes, newGrid, state) {
     for(var v = 0; v < _class.rules.length; v++) {
       var rule=_class.rules[v];
       if(evalBoolExpr.call(this, rule.conditions)) {
-        newGrid[this.y][this.x] = resolveStateRef.call(this, rule.evolve_to);
-        break;
-      }
-      if(v == _class.rules.length) {
-        applyClassRules.call(this, visited_classes, newGrid);
+        this.newGrid[this.x + this.grid.cols * this.y] = resolveStateRef.call(this, rule.evolve_to);
+        return true;
       }
     }
+    if(v == _class.rules.length) {
+      return applyClassRules.call(this, visited_classes, _class);
+    }
   }
+  return false;
 }
 
 
@@ -79,17 +171,17 @@ function evalCondition(condition) {
 }
 
 function evalAdjacency(adjacency) {
-  var neighbors = {};
+  var neighbors = new Uint8Array(this.data.states.length);
   var nbhd = adjacency.in ? adjacency.in : this.nbhd;
   for(var n = 0; n < nbhd.rel_cells.length; n++) {
     var i = this.x + nbhd.rel_cells[n].x;
     var j = this.y + nbhd.rel_cells[n].y;
     
     var currCell = this.grid.getCell(i, j);
-    neighbors[currCell] = (neighbors[currCell] || 0) + 1;
+    neighbors[currCell]++;
   }
   var cell = resolveRef.call(this, adjacency.ref_to_count);
-  var count = neighbors[cell] || 0;
+  var count = neighbors[cell];
   var min = adjacency.min || 0;
   var max = adjacency.max || +Infinity;
   return count >= min && count <= max;
@@ -122,4 +214,4 @@ function evalSubexpression(subexp) {
   if(subexp.operator == "XOR") return right ^ left;
 }
 
-module.exports.Automaton = Automaton;
+module.exports = Automaton;

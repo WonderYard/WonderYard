@@ -1,14 +1,40 @@
+var App = require("./App");
+var Grid = require("./Grid");
+var Automaton = require("./Automaton");
+window.StateManager = require("./StateManager");
 
-var Automaton = require("./automaton").Automaton;
-var Grid = require("./grid").Grid;
-var Canvas = require("./canvas").Canvas;
-var Ajv = require('ajv');
+window.wonderyard = new App(800, 600, {
+	
+	init() {
+		this.grid = new Grid(256, 256);
 
-var schema = require('./data_validator.json');
-var data = require('./data_gol.json');
+		// Temp!
+		this.automaton = new Automaton();
+		
+		this.setState(StateManager.moving);
+	},
+	
+	update() {
+		// Temp!
+		this.grid._data = this.automaton.evolve(this.grid);
+	},
 
-var ajv = new Ajv();
-var valid = ajv.validate(schema, data);
-if (!valid) throw Error(ajv.errorsText());
+	draw() {
+		this.g.fillStyle = "#777777";
+		this.g.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-window.canvas = new Canvas(data);
+		this.g.fillStyle = this.automaton.getColor(0);
+		this.g.fillRect(this.grid.x, this.grid.y, this.grid.getWidth(), this.grid.getHeight());
+
+		for(var y = 0; y < this.grid.rows; y++) {
+			for(var x = 0; x < this.grid.cols; x++) {
+				if(this.grid.getCell(x, y)) this.drawCell(x, y);
+			}
+		}
+	},
+
+	drawCell(x, y) {
+		this.g.fillStyle = this.automaton.getColor(this.grid.getCell(x, y));
+		this.g.fillRect(x * this.grid.scale + this.grid.x, y * this.grid.scale + this.grid.y, this.grid.scale, this.grid.scale);
+	},
+});
