@@ -6,7 +6,7 @@
     <body>
     		<button onclick="wonderyard.setState(StateManager.moving)">Move</button>
     		<button onclick="wonderyard.setState(StateManager.painting)">Paint</button>
-    		<button onclick="wonderyard.setState(StateManager.zooming)">Zoom</button>
+    		<button onclick="wonderyard.setState(StateManager.zooming); StateManager.zooming.invertDirection();">Zoom</button>
     		<br>
         <script src="bundle.js"></script>
     </body>

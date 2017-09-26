@@ -9,7 +9,7 @@ class Grid {
     this._data = new Uint8Array(this.cols * this.rows);
     for(var y = 0; y < this.rows; y++) {
       for(var x = 0; x < this.cols; x++) {
-        this._data[x + this.cols * y] = Math.floor(Math.random() * 2);
+        this._data[x + this.cols * y] = Math.floor(Math.random() * 1);
       }
     }
   }

@@ -20,65 +20,92 @@ state.moving = {
 	},
 };
 
+function line(ax, ay, bx, by) {
+	var dx = Math.abs(bx - ax);
+	var dy = Math.abs(by - ay);
+	var sx = (ax < bx) ? 1 : -1;
+	var sy = (ay < by) ? 1 : -1;
+	var err = dx-dy;
+
+	while(true) {
+		if(this.app.grid.inBounds(ax, ay)) {
+			this.app.grid.setCell(ax, ay, 1);
+			this.app.drawCell(ax, ay);
+		}
+
+		if ((ax == bx) && (ay == by)) break;
+		var e2 = 2 * err;
+		if (e2 > -dy) {
+			err -= dy;
+			ax += sx;
+		}
+		if (e2 < dx) {
+			err += dx;
+			ay += sy;
+		}
+	}
+}
+
 state.painting = {
 	onmousedown(event) {
 		this.mouse = {};
 		this.mouse.raw = event;
+		expandMouse.call(this, this.mouse);
 		
-		if(this.app.grid.hitTest(this.mouse.raw)) {
-
-			var gridX = this.mouse.raw.x - this.app.grid.x;
-			var gridY = this.mouse.raw.y - this.app.grid.y;
-			this.mouse.grid = {x: gridX, y: gridY};
-
-			var cellX = Math.floor(gridX / this.app.grid.scale);
-			var cellY = Math.floor(gridY / this.app.grid.scale);
-			this.mouse.cell = {x: cellX, y: cellY};
+		if(this.app.grid.inBounds(this.mouse.cell.x, this.mouse.cell.y)) {	
+			this.app.grid.setCell(this.mouse.cell.x, this.mouse.cell.y, 1);
 			
-			this.app.grid.setCell(cellX, cellY, this.app.grid.getCell(cellX, cellY) ^ 1);
-			
-			this.app.drawCell(cellX, cellY);
+			this.app.drawCell(this.mouse.cell.x, this.mouse.cell.y);
 		}
 	},
-	
+
 	onmousemove(event) {
 		if(this.mouse) {
 			var mouse = {};
 			mouse.raw = event;
 
-			if(this.app.grid.hitTest(mouse.raw)) {
-
-				var gridX = mouse.raw.x - this.app.grid.x;
-				var gridY = mouse.raw.y - this.app.grid.y;
-				mouse.grid = {x: gridX, y: gridY};
-
-				var cellX = Math.floor(gridX / this.app.grid.scale);
-				var cellY = Math.floor(gridY / this.app.grid.scale);
-				mouse.cell = {x: cellX, y: cellY};
-				if(this.mouse.cell && (this.mouse.cell.x != cellX || this.mouse.cell.y != cellY)) {
-					this.app.grid.setCell(cellX, cellY, this.app.grid.getCell(cellX, cellY) ^ 1);
-					this.app.drawCell(cellX, cellY);
-				}
-			}
+			expandMouse.call(this, mouse);
+			line.call(this, this.mouse.cell.x, this.mouse.cell.y, mouse.cell.x, mouse.cell.y);
 			this.mouse = mouse;
 		}
 	},
 
-	onmouseup(event) {
+	onmouseup() {
 		this.mouse = null;
-	},
+	}
 };
 
+function expandMouse(mouse) {
+	var grid = this.app.grid;
+
+	mouse.grid = {
+		x: mouse.raw.x - grid.x,
+		y: mouse.raw.y - grid.y
+	};
+
+	mouse.cell = {
+		x: Math.floor(mouse.grid.x / grid.scale),
+		y: Math.floor(mouse.grid.y / grid.scale)
+	};
+}
+
 state.zooming = {
+	direction: .25,
+
 	onmousedown(mouse) {
 		var grid = this.app.grid;
-		var zoom = 2;
+		if(grid.scale == 1 && this.direction < 1) return;
+		var zoom = 2 * this.direction;
 		grid.scale = Math.round(grid.scale * zoom);
 
 		var factor = 1 - zoom;
 		grid.x += Math.round((mouse.x - grid.x) * factor);
 		grid.y += Math.round((mouse.y - grid.y) * factor);
 		this.app.requestDraw();
+	},
+
+	invertDirection() {
+		this.direction = this.direction == 1 ? 0.25 : 1;
 	}
 }
 
