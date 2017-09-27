@@ -107,6 +107,51 @@ state.zooming = {
 	invertDirection() {
 		this.direction = this.direction == 1 ? 0.25 : 1;
 	}
-}
+};
+
+state.select = {
+
+	onmousedown(event) {
+		this.mouse = {};
+		this.mouse.raw = event;
+		expandMouse.call(this, this.mouse);
+		this.rectStart = this.mouse.cell;
+	},
+
+	onmousemove(event) {
+		var mouse = { raw: event };
+		expandMouse.call(this, mouse);
+
+		this.app.g2.save();
+		this.app.g2.translate(0.5, 0.5);
+		
+		this.app.g2.clearRect(0, 0, this.app.canvas.width, this.app.canvas.height);
+		this.app.g2.strokeStyle = "#777";
+		this.app.g2.strokeRect(mouse.cell.x * this.app.grid.scale + this.app.grid.x, mouse.cell.y * this.app.grid.scale + this.app.grid.y, this.app.grid.scale, this.app.grid.scale);
+		if(this.mouse) {
+			this.app.g2.strokeRect(this.rectStart.x * this.app.grid.scale + this.app.grid.x, this.rectStart.y * this.app.grid.scale + this.app.grid.y, this.app.grid.scale, this.app.grid.scale);
+			var sx = this.mouse.cell.x;
+			var sy = this.mouse.cell.y;
+			var w = mouse.cell.x - this.mouse.cell.x;
+			var h = mouse.cell.y - this.mouse.cell.y;
+			if(mouse.cell.x >= this.mouse.cell.x) { w++; }
+			else { w--; sx++; }
+			if(mouse.cell.y >= this.mouse.cell.y) { h++; }
+			else { h--; sy++; }
+			this.rect = { x: sx, y: sy, w, h };
+			this.app.g2.strokeRect(sx * this.app.grid.scale + this.app.grid.x, sy * this.app.grid.scale + this.app.grid.y, w * this.app.grid.scale, h * this.app.grid.scale);
+		} else if(this.rect) {
+			this.app.g2.strokeRect(this.rect.x * this.app.grid.scale + this.app.grid.x, this.rect.y * this.app.grid.scale + this.app.grid.y, this.rect.w * this.app.grid.scale, this.rect.h * this.app.grid.scale);
+		}
+
+		this.app.g2.restore();
+	},
+
+	onmouseup(event) {
+		var mouse = {raw: event};
+		expandMouse.call(this, mouse);
+		this.mouse = null;
+	}
+};
 
 module.exports = state;

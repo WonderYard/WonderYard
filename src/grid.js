@@ -4,7 +4,7 @@ class Grid {
     this.rows = rows;
     this.x = 0;
     this.y = 0;
-    this.scale = 1;
+    this.scale = 16;
     
     this._data = new Uint8Array(this.cols * this.rows);
     for(var y = 0; y < this.rows; y++) {

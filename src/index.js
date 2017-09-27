@@ -11,7 +11,7 @@ window.wonderyard = new App(800, 600, {
 		// Temp!
 		this.automaton = new Automaton();
 		
-		this.setState(StateManager.moving);
+		this.setState(StateManager.select);
 	},
 	
 	update() {
