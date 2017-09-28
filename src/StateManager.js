@@ -74,7 +74,8 @@ state.select = {
 
 	onmousedown(event) {
 		this.mouse = expandMouse.call(this, event);
-			if(selectionRect && inBounds(this.mouse.cell, selectionRect)) {
+		if(selectionRect) {
+			if(inBounds(this.mouse.cell, selectionRect)) {
 				this.drag = this.mouse;
 			}
 			else {
@@ -85,7 +86,18 @@ state.select = {
 					bx: this.mouse.cell.x,
 					by: this.mouse.cell.y
 				};
+				requestDraw.call(this);
 			}
+		}
+		else {
+			this.rect = {
+				ax: this.mouse.cell.x,
+				ay: this.mouse.cell.y,
+				bx: this.mouse.cell.x,
+				by: this.mouse.cell.y
+			};
+			requestDraw.call(this);
+		}
 	},
 
 	onmousemove(event) {
@@ -116,6 +128,8 @@ state.select = {
 	draw() {
 		this.app.g2.clearRect(0, 0, this.app.canvas2.width, this.app.canvas2.height);
 		
+		if(!selectionRect) return;
+
 		// Pixel perfect fix for 1px stroke line
 		this.app.g2.save();
 		this.app.g2.translate(.5, .5);
@@ -125,22 +139,22 @@ state.select = {
 
 		// // Start cell
 		// this.app.g2.strokeStyle = "#0f0";
-		// this.app.g2.strokeRect(this.rect.ax * this.app.grid.scale + this.app.grid.x, this.rect.ay * this.app.grid.scale + this.app.grid.y, this.app.grid.scale, this.app.grid.scale);
+		// this.app.g2.strokeRect(selectionRect.ax * this.app.grid.scale + this.app.grid.x, selectionRect.ay * this.app.grid.scale + this.app.grid.y, this.app.grid.scale, this.app.grid.scale);
 		
 		// // End cell
 		// this.app.g2.strokeStyle = "#f00";
-		// this.app.g2.strokeRect(this.rect.bx * this.app.grid.scale + this.app.grid.x, this.rect.by * this.app.grid.scale + this.app.grid.y, this.app.grid.scale, this.app.grid.scale);
+		// this.app.g2.strokeRect(selectionRect.bx * this.app.grid.scale + this.app.grid.x, selectionRect.by * this.app.grid.scale + this.app.grid.y, this.app.grid.scale, this.app.grid.scale);
 		
-		var topx = this.rect.ax;
-		var topy = this.rect.ay;
+		var topx = selectionRect.ax;
+		var topy = selectionRect.ay;
 
-		var botx = this.rect.bx - this.rect.ax;
-		var boty = this.rect.by - this.rect.ay;
+		var botx = selectionRect.bx - selectionRect.ax;
+		var boty = selectionRect.by - selectionRect.ay;
 
 		// Adjust selection rectangle border, different case for each axis if selection is inverted (bot-top, right-left) 
-		if(this.rect.ax < this.rect.bx) botx++;
+		if(selectionRect.ax < selectionRect.bx) botx++;
 		else { botx--; topx++; }
-		if(this.rect.ay < this.rect.by) boty++;
+		if(selectionRect.ay < selectionRect.by) boty++;
 		else { boty--; topy++; }
 
 		this.app.g2.strokeStyle = "#777777";
