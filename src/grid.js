@@ -38,10 +38,6 @@ class Grid {
   getHeight() {
     return this.scale * this.rows;
   }
-
-  hitTest(point) {
-    return (point.x >= this.x && point.x < this.x + this.getWidth() && point.y >= this.y && point.y < this.y + this.getHeight());
-  }
 }
 
 module.exports = Grid;

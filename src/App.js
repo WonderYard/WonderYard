@@ -49,12 +49,6 @@ class App {
 		this.currentState.app = this;
 	}
 
-	requestDraw() {
-		// Conditions
-		// ...
-		this.draw();
-	}
-
 	// Utility functions
 	_getMousePos(event) {
 		var rect = this.canvas.getBoundingClientRect();

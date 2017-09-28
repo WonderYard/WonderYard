@@ -1,3 +1,5 @@
+var selectionRect = null;
+
 var state = {};
 
 state.moving = {
@@ -11,7 +13,7 @@ state.moving = {
 			this.app.grid.y += mouse.y - this.mouse.y;
 
 			this.mouse = mouse;
-			this.app.requestDraw();
+			requestDraw.call(this);
 		}
 	},
 
@@ -20,51 +22,24 @@ state.moving = {
 	},
 };
 
-function line(ax, ay, bx, by) {
-	var dx = Math.abs(bx - ax);
-	var dy = Math.abs(by - ay);
-	var sx = (ax < bx) ? 1 : -1;
-	var sy = (ay < by) ? 1 : -1;
-	var err = dx-dy;
-
-	while(true) {
-		if(this.app.grid.inBounds(ax, ay)) {
-			this.app.grid.setCell(ax, ay, 1);
-			this.app.drawCell(ax, ay);
-		}
-
-		if ((ax == bx) && (ay == by)) break;
-		var e2 = 2 * err;
-		if (e2 > -dy) {
-			err -= dy;
-			ax += sx;
-		}
-		if (e2 < dx) {
-			err += dx;
-			ay += sy;
-		}
-	}
-}
-
 state.painting = {
 	onmousedown(event) {
-		this.mouse = {};
-		this.mouse.raw = event;
-		expandMouse.call(this, this.mouse);
+		this.mouse = expandMouse.call(this, event);
 		
-		if(this.app.grid.inBounds(this.mouse.cell.x, this.mouse.cell.y)) {	
-			this.app.grid.setCell(this.mouse.cell.x, this.mouse.cell.y, 1);
+		if(this.app.grid.inBounds(this.mouse.cell.x, this.mouse.cell.y)) {
 			
-			this.app.drawCell(this.mouse.cell.x, this.mouse.cell.y);
+			if(!selectionRect || inBounds(this.mouse.cell, selectionRect)) {
+			
+				this.app.grid.setCell(this.mouse.cell.x, this.mouse.cell.y, 1);
+				this.app.drawCell(this.mouse.cell.x, this.mouse.cell.y);
+			}
 		}
 	},
 
 	onmousemove(event) {
 		if(this.mouse) {
-			var mouse = {};
-			mouse.raw = event;
+			var mouse = expandMouse.call(this, event);
 
-			expandMouse.call(this, mouse);
 			line.call(this, this.mouse.cell.x, this.mouse.cell.y, mouse.cell.x, mouse.cell.y);
 			this.mouse = mouse;
 		}
@@ -74,20 +49,6 @@ state.painting = {
 		this.mouse = null;
 	}
 };
-
-function expandMouse(mouse) {
-	var grid = this.app.grid;
-
-	mouse.grid = {
-		x: mouse.raw.x - grid.x,
-		y: mouse.raw.y - grid.y
-	};
-
-	mouse.cell = {
-		x: Math.floor(mouse.grid.x / grid.scale),
-		y: Math.floor(mouse.grid.y / grid.scale)
-	};
-}
 
 state.zooming = {
 	direction: .25,
@@ -101,7 +62,7 @@ state.zooming = {
 		var factor = 1 - zoom;
 		grid.x += Math.round((mouse.x - grid.x) * factor);
 		grid.y += Math.round((mouse.y - grid.y) * factor);
-		this.app.requestDraw();
+		requestDraw.call(this);
 	},
 
 	invertDirection() {
@@ -112,46 +73,146 @@ state.zooming = {
 state.select = {
 
 	onmousedown(event) {
-		this.mouse = {};
-		this.mouse.raw = event;
-		expandMouse.call(this, this.mouse);
-		this.rectStart = this.mouse.cell;
+		this.mouse = expandMouse.call(this, event);
+			if(selectionRect && inBounds(this.mouse.cell, selectionRect)) {
+				this.drag = this.mouse;
+			}
+			else {
+				selectionRect = null;
+				this.rect = {
+					ax: this.mouse.cell.x,
+					ay: this.mouse.cell.y,
+					bx: this.mouse.cell.x,
+					by: this.mouse.cell.y
+				};
+			}
 	},
 
 	onmousemove(event) {
-		var mouse = { raw: event };
-		expandMouse.call(this, mouse);
-
-		this.app.g2.save();
-		this.app.g2.translate(0.5, 0.5);
-		
-		this.app.g2.clearRect(0, 0, this.app.canvas.width, this.app.canvas.height);
-		this.app.g2.strokeStyle = "#777";
-		this.app.g2.strokeRect(mouse.cell.x * this.app.grid.scale + this.app.grid.x, mouse.cell.y * this.app.grid.scale + this.app.grid.y, this.app.grid.scale, this.app.grid.scale);
+		var mouse = expandMouse.call(this, event);
 		if(this.mouse) {
-			this.app.g2.strokeRect(this.rectStart.x * this.app.grid.scale + this.app.grid.x, this.rectStart.y * this.app.grid.scale + this.app.grid.y, this.app.grid.scale, this.app.grid.scale);
-			var sx = this.mouse.cell.x;
-			var sy = this.mouse.cell.y;
-			var w = mouse.cell.x - this.mouse.cell.x;
-			var h = mouse.cell.y - this.mouse.cell.y;
-			if(mouse.cell.x >= this.mouse.cell.x) { w++; }
-			else { w--; sx++; }
-			if(mouse.cell.y >= this.mouse.cell.y) { h++; }
-			else { h--; sy++; }
-			this.rect = { x: sx, y: sy, w, h };
-			this.app.g2.strokeRect(sx * this.app.grid.scale + this.app.grid.x, sy * this.app.grid.scale + this.app.grid.y, w * this.app.grid.scale, h * this.app.grid.scale);
-		} else if(this.rect) {
-			this.app.g2.strokeRect(this.rect.x * this.app.grid.scale + this.app.grid.x, this.rect.y * this.app.grid.scale + this.app.grid.y, this.rect.w * this.app.grid.scale, this.rect.h * this.app.grid.scale);
+			if(this.drag) {
+				var dx = - this.drag.cell.x + mouse.cell.x;
+				var dy = - this.drag.cell.y + mouse.cell.y;
+				this.rect.ax += dx;
+				this.rect.ay += dy;
+				this.rect.bx += dx;
+				this.rect.by += dy;
+				this.drag = mouse;
+			} else {
+				this.rect.bx = mouse.cell.x;
+				this.rect.by = mouse.cell.y;
+			}
+			selectionRect = this.rect;
+			requestDraw.call(this);
 		}
-
-		this.app.g2.restore();
 	},
 
 	onmouseup(event) {
-		var mouse = {raw: event};
-		expandMouse.call(this, mouse);
 		this.mouse = null;
+		this.drag = false;
+	},
+
+	draw() {
+		this.app.g2.clearRect(0, 0, this.app.canvas2.width, this.app.canvas2.height);
+		
+		// Pixel perfect fix for 1px stroke line
+		this.app.g2.save();
+		this.app.g2.translate(.5, .5);
+		
+		this.app.g2.lineWidth = 3;
+		this.app.g2.setLineDash([6, 6]);
+
+		// // Start cell
+		// this.app.g2.strokeStyle = "#0f0";
+		// this.app.g2.strokeRect(this.rect.ax * this.app.grid.scale + this.app.grid.x, this.rect.ay * this.app.grid.scale + this.app.grid.y, this.app.grid.scale, this.app.grid.scale);
+		
+		// // End cell
+		// this.app.g2.strokeStyle = "#f00";
+		// this.app.g2.strokeRect(this.rect.bx * this.app.grid.scale + this.app.grid.x, this.rect.by * this.app.grid.scale + this.app.grid.y, this.app.grid.scale, this.app.grid.scale);
+		
+		var topx = this.rect.ax;
+		var topy = this.rect.ay;
+
+		var botx = this.rect.bx - this.rect.ax;
+		var boty = this.rect.by - this.rect.ay;
+
+		// Adjust selection rectangle border, different case for each axis if selection is inverted (bot-top, right-left) 
+		if(this.rect.ax < this.rect.bx) botx++;
+		else { botx--; topx++; }
+		if(this.rect.ay < this.rect.by) boty++;
+		else { boty--; topy++; }
+
+		this.app.g2.strokeStyle = "#777777";
+		this.app.g2.strokeRect(topx * this.app.grid.scale + this.app.grid.x, topy * this.app.grid.scale + this.app.grid.y, botx * this.app.grid.scale, boty * this.app.grid.scale);
+
+		this.app.g2.restore();
 	}
 };
+
+// TODO: single function for each type of coordinates (?)
+function expandMouse(event) {
+	var mouse = { raw: event };
+	var grid = this.app.grid;
+
+	mouse.grid = {
+		x: mouse.raw.x - grid.x,
+		y: mouse.raw.y - grid.y
+	};
+
+	mouse.cell = {
+		x: Math.floor(mouse.grid.x / grid.scale),
+		y: Math.floor(mouse.grid.y / grid.scale)
+	};
+
+	return mouse;
+}
+
+function requestDraw() {
+	
+	// Other conditions (?)
+	// if(!this.app.looping || this.app.ups < 60) { // Code here }
+
+	for(s in state) {
+		if(state[s].draw) state[s].draw();
+	}
+	this.app.draw();
+}
+
+function line(ax, ay, bx, by) {
+	var dx = Math.abs(bx - ax);
+	var dy = Math.abs(by - ay);
+	var sx = (ax < bx) ? 1 : -1;
+	var sy = (ay < by) ? 1 : -1;
+	var err = dx - dy;
+
+	while(true) {
+		if(this.app.grid.inBounds(ax, ay)) {
+			if(!selectionRect || inBounds({x: ax, y: ay}, selectionRect)) {
+				this.app.grid.setCell(ax, ay, 1);
+				this.app.drawCell(ax, ay);
+			}
+		}
+
+		if (ax == bx && ay == by) break;
+		var e2 = 2 * err;
+		if (e2 > -dy) {
+			err -= dy;
+			ax += sx;
+		}
+		if (e2 < dx) {
+			err += dx;
+			ay += sy;
+		}
+	}
+}
+
+function inBounds(point, area) {
+	var ax = Math.min(area.ax, area.bx);
+	var ay = Math.min(area.ay, area.by);
+	var bx = Math.max(area.ax, area.bx) + 1;
+	var by = Math.max(area.ay, area.by) + 1;
+	return point.x >= ax && point.x < bx && point.y >= ay && point.y < by;
+}
 
 module.exports = state;
