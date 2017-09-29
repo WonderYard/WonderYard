@@ -41,8 +41,4 @@ window.wonderyard = new App(800, 600, {
 		this.g.fillStyle = this.automaton.getColor(this.grid.getCell(x, y));
 		this.g.fillRect(x * this.grid.scale + this.grid.x, y * this.grid.scale + this.grid.y, this.grid.scale, this.grid.scale);
 	},
-
-	toggleOverlayGrid() {
-		StateManager.overlay.toggleOverlayGrid();
-	}
 });

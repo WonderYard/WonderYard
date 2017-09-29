@@ -5,14 +5,14 @@
     </head>
     <body>
             <button onclick="wonderyard.toggleLoop()">Toggle loop</button>
-            
+
     		<button onclick="wonderyard.setState(StateManager.moving)">Move</button>
     		<button onclick="wonderyard.setState(StateManager.zooming); StateManager.zooming.invertDirection();">Zoom</button>
 
             <button onclick="wonderyard.setState(StateManager.painting)">Paint</button>
             <button onclick="wonderyard.setState(StateManager.select)">Select</button>
             
-            <button onclick="wonderyard.toggleOverlayGrid()">Overlay Grid</button>
+            <button onclick="StateManager.overlay.toggleOverlayGrid()">Overlay Grid</button>
     		<br>
             <div style="position: relative;">
                 <canvas id="canvas1" style="position: absolute; left: 0; top: 0; z-index: 0;"></canvas>

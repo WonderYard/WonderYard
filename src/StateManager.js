@@ -170,10 +170,10 @@ state.overlay = {
 	toggleOverlayGrid() {
 		if(this.drawOverlayGrid) {
 			if(this.app.grid.scale >= this.overlayGridThreshold) this.drawOverlayGrid = false;
-			else this.overlayGridThreshold = this.app.grid.scale;
+			else this.overlayGridThreshold = Math.min(2, this.app.grid.scale);
 		}
 		else {
-			this.overlayGridThreshold = this.app.grid.scale;
+			this.overlayGridThreshold = Math.min(2, this.app.grid.scale);
 			this.drawOverlayGrid = true;
 		}
 		this.draw();
@@ -228,13 +228,15 @@ function expandMouse(event) {
 
 function requestDraw() {
 	
-	// Other conditions (?)
-	if(true) {
+	if(!this.app.looping) {
 
 		for(s in state) {
 			if(state[s].draw) state[s].draw();
 		}
 		this.app.draw();
+	}
+	else {
+		state.overlay.draw();
 	}
 }
 
