@@ -6,7 +6,7 @@ window.StateManager = require("./StateManager");
 window.wonderyard = new App(800, 600, {
 	
 	init() {
-		this.grid = new Grid(256, 512);
+		this.grid = new Grid(128, 64);
 
 		// Temp!
 		this.automaton = new Automaton();
@@ -16,6 +16,7 @@ window.wonderyard = new App(800, 600, {
 		}
 
 		this.setState(StateManager.select);
+		StateManager.overlay.draw();
 	},
 	
 	update() {

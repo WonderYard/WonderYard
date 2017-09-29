@@ -167,8 +167,8 @@ state.select = {
 
 state.overlay = {
 	
-	drawOverlayGrid: true,
-	overlayGridThreshold: 2,
+	drawOverlayGrid: false,
+	overlayGridThreshold: 16,
 
 	toggleOverlayGrid() {
 		if(this.app.grid.scale >= this.overlayGridThreshold) {
@@ -191,13 +191,13 @@ state.overlay = {
 			
 			this.app.g3.beginPath();
 			for(var i = 0; i < this.app.grid.rows; i++) {
-
 				this.app.g3.moveTo(this.app.grid.x, i * this.app.grid.scale + this.app.grid.y);
 				this.app.g3.lineTo(this.app.grid.x + this.app.grid.scale * this.app.grid.cols, i * this.app.grid.scale + this.app.grid.y);
-				
-				this.app.g3.moveTo(i * this.app.grid.scale + this.app.grid.x, this.app.grid.y);
-				this.app.g3.lineTo(i * this.app.grid.scale + this.app.grid.x, this.app.grid.y + this.app.grid.scale * this.app.grid.rows);
-				
+			}
+
+			for(var j = 0; j < this.app.grid.cols; j++) {
+				this.app.g3.moveTo(j * this.app.grid.scale + this.app.grid.x, this.app.grid.y);
+				this.app.g3.lineTo(j * this.app.grid.scale + this.app.grid.x, this.app.grid.y + this.app.grid.scale * this.app.grid.rows);
 			}
 			this.app.g3.stroke();
 
