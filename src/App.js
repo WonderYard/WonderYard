@@ -105,6 +105,11 @@ class App {
 		this.frame = requestAnimationFrame(this._draw.bind(this));
 	}
 
+	step() {
+		this.update();
+		this.draw();
+	}
+
 	setState(state) {
 		this.currentState = state;
 		// // Pass a reference of the app to the state

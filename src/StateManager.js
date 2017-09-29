@@ -164,17 +164,12 @@ state.select = {
 
 state.overlay = {
 	
-	drawOverlayGrid: false,
-	overlayGridThreshold: 16,
+	drawOverlayGrid: true,
+	overlayGridThreshold: 32,
 
 	toggleOverlayGrid() {
-		if(this.drawOverlayGrid) {
-			if(this.app.grid.scale >= this.overlayGridThreshold) this.drawOverlayGrid = false;
-			else this.overlayGridThreshold = Math.min(2, this.app.grid.scale);
-		}
-		else {
-			this.overlayGridThreshold = Math.min(2, this.app.grid.scale);
-			this.drawOverlayGrid = true;
+		if(this.app.grid.scale >= this.overlayGridThreshold) {
+			this.drawOverlayGrid = !this.drawOverlayGrid;
 		}
 		this.draw();
 	},

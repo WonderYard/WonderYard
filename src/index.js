@@ -6,7 +6,7 @@ window.StateManager = require("./StateManager");
 window.wonderyard = new App(800, 600, {
 	
 	init() {
-		this.grid = new Grid(256, 256);
+		this.grid = new Grid(256, 512);
 
 		// Temp!
 		this.automaton = new Automaton();
