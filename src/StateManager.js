@@ -212,7 +212,7 @@ state.bucket = {
 		var x = mouse.cell.x;
 		var y = mouse.cell.y;
 
-		var target = this.app.grid.getCell(x, y);
+		var target = state.painting.currentColor;
 
 		var queue = [{x, y}];
 		var current;
@@ -221,8 +221,8 @@ state.bucket = {
 			current = queue.shift();
 			x = current.x;
 			y = current.y;
-			if (this.app.grid.getCell(x, y) == target && (!selectionRect || inBounds({x, y}, selectionRect))) {
-				this.app.grid.setCell(x, y, state.painting.currentColor);
+			if (this.app.grid.inBounds(x, y) && this.app.grid.getCell(x, y) != target && (!selectionRect || inBounds({x, y}, selectionRect))) {
+				this.app.grid.setCell(x, y, target);
 
 				if (x > 0) {
 					queue.push({x:x-1, y:y})
