@@ -162,6 +162,52 @@ state.select = {
 	}
 };
 
+state.overlay = {
+	
+	drawOverlayGrid: false,
+	overlayGridThreshold: 16,
+
+	toggleOverlayGrid() {
+		if(this.drawOverlayGrid) {
+			if(this.app.grid.scale >= this.overlayGridThreshold) this.drawOverlayGrid = false;
+			else this.overlayGridThreshold = this.app.grid.scale;
+		}
+		else {
+			this.overlayGridThreshold = this.app.grid.scale;
+			this.drawOverlayGrid = true;
+		}
+		this.draw();
+	},
+
+	draw() {
+		this.app.g3.clearRect(0, 0, this.app.canvas.width, this.app.canvas.height);
+
+		if(this.drawOverlayGrid && this.app.grid.scale >= this.overlayGridThreshold) {
+			
+			this.app.g3.save();
+			this.app.g3.translate(.5, .5);
+			
+			this.app.g3.lineWidth = 1;
+			this.app.g3.strokeStyle = "#777777";
+			//this.app.g3.setLineDash([this.app.grid.scale / 8, this.app.grid.scale / 8]);
+			
+			this.app.g3.beginPath();
+			for(var i = 0; i < this.app.grid.rows; i++) {
+
+				this.app.g3.moveTo(this.app.grid.x, i * this.app.grid.scale + this.app.grid.y);
+				this.app.g3.lineTo(this.app.grid.x + this.app.grid.scale * this.app.grid.cols, i * this.app.grid.scale + this.app.grid.y);
+				
+				this.app.g3.moveTo(i * this.app.grid.scale + this.app.grid.x, this.app.grid.y);
+				this.app.g3.lineTo(i * this.app.grid.scale + this.app.grid.x, this.app.grid.y + this.app.grid.scale * this.app.grid.rows);
+				
+			}
+			this.app.g3.stroke();
+
+			this.app.g3.restore();
+		}
+	}
+}
+
 // TODO: single function for each type of coordinates (?)
 function expandMouse(event) {
 	var mouse = { raw: event };
@@ -183,12 +229,13 @@ function expandMouse(event) {
 function requestDraw() {
 	
 	// Other conditions (?)
-	// if(!this.app.looping || this.app.ups < 60) { // Code here }
+	if(true) {
 
-	for(s in state) {
-		if(state[s].draw) state[s].draw();
+		for(s in state) {
+			if(state[s].draw) state[s].draw();
+		}
+		this.app.draw();
 	}
-	this.app.draw();
 }
 
 function line(ax, ay, bx, by) {

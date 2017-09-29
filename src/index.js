@@ -11,10 +11,11 @@ window.wonderyard = new App(800, 600, {
 		// Temp!
 		this.automaton = new Automaton();
 		
-		this.setState(StateManager.select);
+		for(s in StateManager) {
+			StateManager[s].app = this;
+		}
 
-		this.drawOverlayGrid = true;
-		this.overlayGridThreshold = 16;
+		this.setState(StateManager.select);
 	},
 	
 	update() {
@@ -34,33 +35,6 @@ window.wonderyard = new App(800, 600, {
 				if(this.grid.getCell(x, y)) this.drawCell(x, y);
 			}
 		}
-
-		// Overlay
-		this.g3.clearRect(0, 0, this.canvas.width, this.canvas.height);
-		
-		if(this.drawOverlayGrid && this.grid.scale >= this.overlayGridThreshold) {
-			
-			this.g3.save();
-			this.g3.translate(.5, .5);
-			
-			this.g3.lineWidth = 1;
-			this.g3.strokeStyle = "#777777";
-			this.g3.setLineDash([this.grid.scale / 8, this.grid.scale / 8]);
-			
-			this.g3.beginPath();
-			for(var i = 0; i < this.grid.rows; i++) {
-
-				this.g3.moveTo(this.grid.x, i * this.grid.scale + this.grid.y);
-				this.g3.lineTo(this.grid.x + this.grid.scale * this.grid.cols, i * this.grid.scale + this.grid.y);
-				
-				this.g3.moveTo(i * this.grid.scale + this.grid.x, this.grid.y);
-				this.g3.lineTo(i * this.grid.scale + this.grid.x, this.grid.y + this.grid.scale * this.grid.rows);
-				
-			}
-			this.g3.stroke();
-
-			this.g3.restore();
-		}
 	},
 
 	drawCell(x, y) {
@@ -69,14 +43,6 @@ window.wonderyard = new App(800, 600, {
 	},
 
 	toggleOverlayGrid() {
-		if(this.drawOverlayGrid) {
-			if(this.grid.scale >= this.overlayGridThreshold) this.drawOverlayGrid = false;
-			else this.overlayGridThreshold = this.grid.scale;
-		}
-		else {
-			this.overlayGridThreshold = this.grid.scale;
-			this.drawOverlayGrid = true;
-		}
-		this.draw();
+		StateManager.overlay.toggleOverlayGrid();
 	}
 });

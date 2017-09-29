@@ -6,6 +6,19 @@ class App {
 		var self = this;
 		this.currentState = null;
 
+		this.looping = false;
+		this.ups = 2;
+		this.interval = null;
+		this.frame = null;
+
+		// this.uCount = 0;
+		// this.realUps = 0;
+
+		// this.fps = 0;
+		// this.fCount = 0;
+		
+		// this.now = Date.now();
+
 		// Canvas initialization
 		this.canvas = document.getElementById("canvas1");
 		this.canvas.width = width;
@@ -48,10 +61,54 @@ class App {
 		this.draw();
 	}
 
+	toggleLoop() {
+		if(!this.looping) {
+			this.looping = true;
+			this._update();
+			this._draw();
+			this.interval = setInterval(this._update.bind(this), 1000/this.ups);
+		}
+		else {
+			this.looping = false;
+			clearInterval(this.interval);
+			cancelAnimationFrame(this.frame);
+		}
+	}
+
+	setUps(ups) {
+		this.ups = ups;
+		if(this.looping) {
+			clearInterval(this.interval);
+			this.interval = setInterval(this._update.bind(this), 1000/this.ups);
+		}
+	}
+
+	_update() {
+		this.update();
+		// this.uCount++;
+		// var now = Date.now();
+		// var delta = now - this.now;
+		// if(delta >= 1000) {
+		// 	this.now = now;
+			
+		// 	this.fps = this.fCount;
+		// 	this.fCount = 0;
+
+		// 	this.realUps = this.uCount;
+		// 	this.uCount = 0;
+		// }
+	}
+
+	_draw() {
+		// this.fCount++;
+		this.draw();
+		this.frame = requestAnimationFrame(this._draw.bind(this));
+	}
+
 	setState(state) {
 		this.currentState = state;
-		// Pass a reference of the app to the state
-		this.currentState.app = this;
+		// // Pass a reference of the app to the state
+		// this.currentState.app = this;
 	}
 
 	// Utility functions
