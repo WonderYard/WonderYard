@@ -86,7 +86,7 @@ state.select = {
 					bx: this.mouse.cell.x,
 					by: this.mouse.cell.y
 				};
-				requestDraw.call(this);
+				this.draw();
 			}
 		}
 		else {
@@ -96,7 +96,7 @@ state.select = {
 				bx: this.mouse.cell.x,
 				by: this.mouse.cell.y
 			};
-			requestDraw.call(this);
+			this.draw();
 		}
 	},
 
@@ -116,7 +116,7 @@ state.select = {
 				this.rect.by = mouse.cell.y;
 			}
 			selectionRect = this.rect;
-			requestDraw.call(this);
+			this.draw();
 		}
 	},
 
@@ -129,13 +129,6 @@ state.select = {
 		this.app.g2.clearRect(0, 0, this.app.canvas2.width, this.app.canvas2.height);
 		
 		if(!selectionRect) return;
-
-		// Pixel perfect fix for 1px stroke line
-		this.app.g2.save();
-		this.app.g2.translate(.5, .5);
-		
-		this.app.g2.lineWidth = 3;
-		this.app.g2.setLineDash([6, 6]);
 
 		// // Start cell
 		// this.app.g2.strokeStyle = "#0f0";
@@ -157,10 +150,15 @@ state.select = {
 		if(selectionRect.ay < selectionRect.by) boty++;
 		else { boty--; topy++; }
 
-		this.app.g2.strokeStyle = "#777777";
+		this.app.g2.lineWidth = 2;
+		
+		this.app.g2.strokeStyle = "#000000";
+		this.app.g2.setLineDash([]);
 		this.app.g2.strokeRect(topx * this.app.grid.scale + this.app.grid.x, topy * this.app.grid.scale + this.app.grid.y, botx * this.app.grid.scale, boty * this.app.grid.scale);
 
-		this.app.g2.restore();
+		this.app.g2.strokeStyle = "#ffffff";
+		this.app.g2.setLineDash([8, 8]);
+		this.app.g2.strokeRect(topx * this.app.grid.scale + this.app.grid.x, topy * this.app.grid.scale + this.app.grid.y, botx * this.app.grid.scale, boty * this.app.grid.scale);
 	}
 };
 

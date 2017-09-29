@@ -17,6 +17,11 @@ class App {
 		this.canvas2.height = height;
 		this.g2 = this.canvas2.getContext("2d");
 
+		this.canvas3 = document.getElementById("canvas3");
+		this.canvas3.width = width;
+		this.canvas3.height = height;
+		this.g3 = this.canvas3.getContext("2d");
+
 		// Binding mouse events to current state callbacks
 		this.canvas2.addEventListener("mousedown", function(event) {
 			if(self.currentState.onmousedown) self.currentState.onmousedown(self._getMousePos(event));
