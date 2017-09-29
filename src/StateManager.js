@@ -23,6 +23,9 @@ state.moving = {
 };
 
 state.painting = {
+	
+	currentColor: 1,
+
 	onmousedown(event) {
 		this.mouse = expandMouse.call(this, event);
 		
@@ -30,7 +33,7 @@ state.painting = {
 			
 			if(!selectionRect || inBounds(this.mouse.cell, selectionRect)) {
 			
-				this.app.grid.setCell(this.mouse.cell.x, this.mouse.cell.y, 1);
+				this.app.grid.setCell(this.mouse.cell.x, this.mouse.cell.y, this.currentColor);
 				this.app.drawCell(this.mouse.cell.x, this.mouse.cell.y);
 			}
 		}
@@ -165,7 +168,7 @@ state.select = {
 state.overlay = {
 	
 	drawOverlayGrid: true,
-	overlayGridThreshold: 32,
+	overlayGridThreshold: 2,
 
 	toggleOverlayGrid() {
 		if(this.app.grid.scale >= this.overlayGridThreshold) {
@@ -201,6 +204,46 @@ state.overlay = {
 			this.app.g3.restore();
 		}
 	}
+}
+
+state.bucket = {
+	onmousedown(event) {
+		var mouse = expandMouse.call(this, event);
+		var x = mouse.cell.x;
+		var y = mouse.cell.y;
+
+		var target = this.app.grid.getCell(x, y);
+
+		var queue = [{x, y}];
+		var current;
+
+		while (queue.length) {
+			current = queue.shift();
+			x = current.x;
+			y = current.y;
+			if (this.app.grid.getCell(x, y) == target && (!selectionRect || inBounds({x, y}, selectionRect))) {
+				this.app.grid.setCell(x, y, state.painting.currentColor);
+
+				if (x > 0) {
+					queue.push({x:x-1, y:y})
+				}
+
+				if (x < this.app.grid.cols - 1) {
+					queue.push({x:x+1, y:y})
+				}
+
+				if (y > 0) {
+					queue.push({x:x, y:y-1});
+				}
+
+				if (y < this.app.grid.rows - 1) {
+					queue.push({x:x, y:y+1});
+				}
+			}
+		}
+
+		this.app.draw();
+	},
 }
 
 // TODO: single function for each type of coordinates (?)
