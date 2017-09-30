@@ -204,7 +204,7 @@ state.overlay = {
 			this.app.g3.restore();
 		}
 	}
-}
+};
 
 state.bucket = {
 	onmousedown(event) {
@@ -244,7 +244,7 @@ state.bucket = {
 
 		this.app.draw();
 	},
-}
+};
 
 // TODO: single function for each type of coordinates (?)
 function expandMouse(event) {
