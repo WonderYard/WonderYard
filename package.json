@@ -3,9 +3,12 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
-  "devDependencies": {},
+  "devDependencies": {
+    "webpack": "^3.6.0"
+  },
   "dependencies": {
     "ajv": "^5.2.2",
-    "lodash": "^4.17.4"
+    "lodash": "^4.17.4",
+    "webpack-dev-server": "^2.9.1"
   }
 }
