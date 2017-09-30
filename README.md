@@ -14,7 +14,7 @@ A short description of the motivation behind the creation and maintenance of the
 
 ## Installation
 `yarn install`  
-`webpack-dev-server`
+`yarn start`
 
 ## API Reference
 
