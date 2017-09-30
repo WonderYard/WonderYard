@@ -266,16 +266,11 @@ function expandMouse(event) {
 
 function requestDraw() {
 	
-	if(!this.app.looping) {
-
-		for(s in state) {
-			if(state[s].draw) state[s].draw();
-		}
+	for(s in state) {
+		if(state[s].draw) state[s].draw();
+	}
+	// if(!this.app.looping)
 		this.app.draw();
-	}
-	else {
-		state.overlay.draw();
-	}
 }
 
 function line(ax, ay, bx, by) {
