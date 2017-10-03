@@ -3,6 +3,10 @@ var Grid = require("./Grid");
 var Automaton = require("./Automaton");
 window.StateManager = require("./StateManager");
 
+import React from 'react';
+import ReactDOM from 'react-dom';
+import AutomatonUI from './AutomatonUI';
+
 window.wonderyard = new App(800, 600, {
 	
 	init() {
@@ -11,12 +15,17 @@ window.wonderyard = new App(800, 600, {
 		// Temp!
 		this.automaton = new Automaton();
 		
-		for(s in StateManager) {
+		for(var s in StateManager) {
 			StateManager[s].app = this;
 		}
 
 		this.setState(StateManager.select);
 		StateManager.overlay.draw();
+
+		ReactDOM.render(
+		  <AutomatonUI data={this.automaton.data} />,
+		  document.getElementById('root')
+		);
 	},
 	
 	update() {

@@ -5,6 +5,7 @@ class Automaton {
   "nbhds": [],
   "states": [
     {
+      "name": "Dead",
       "color": "#000",
       "rules": [
         {
@@ -41,6 +42,7 @@ class Automaton {
       "class_list": []
     },
     {
+      "name": "Alive",
       "color": "#FFF",
       "rules": [
         {
