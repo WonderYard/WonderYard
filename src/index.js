@@ -13,7 +13,96 @@ window.wonderyard = new App(800, 600, {
 		this.grid = new Grid(128, 64);
 
 		// Temp!
-		this.automaton = new Automaton();
+		this.automaton = new Automaton(
+{
+  "classes": [],
+  "nbhds": [],
+  "states": [
+    {
+      "name": "Dead",
+      "color": "#000",
+      "rules": [
+        {
+          "evolve_to": {
+            "state_id": 1
+          },
+          "conditions": {
+            "subexp": {
+              "operator": "AND",
+              "right_chd": {
+                "term": {
+                  "cond": {
+                    "adjacency": {
+                      "ref_to_count": {
+                        "state_ref": {
+                          "state_id": 1
+                        }
+                      },
+                      "min": 3,
+                      "max": 3
+                    }
+                  }
+                }
+              },
+              "left_chd": {
+                "term": {
+                  "bool_lit": true
+                }
+              }
+            }
+          }
+        }
+      ],
+      "class_list": []
+    },
+    {
+      "name": "Alive",
+      "color": "#FFF",
+      "rules": [
+        {
+          "evolve_to": {
+            "state_id": 0
+          },
+          "conditions": {
+            "subexp": {
+              "operator": "OR",
+              "right_chd": {
+                "term": {
+                  "cond": {
+                    "adjacency": {
+                      "ref_to_count": {
+                        "state_ref": {
+                          "state_id": 1
+                        }
+                      },
+                      "max": 1
+                    }
+                  }
+                }
+              },
+              "left_chd": {
+                "term": {
+                  "cond": {
+                    "adjacency": {
+                      "ref_to_count": {
+                        "state_ref": {
+                          "state_id": 1
+                        }
+                      },
+                      "min": 4
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "class_list": []
+    }
+  ]
+}
+		);
 		
 		for(var s in StateManager) {
 			StateManager[s].app = this;

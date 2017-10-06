@@ -266,7 +266,7 @@ function expandMouse(event) {
 
 function requestDraw() {
 	
-	for(s in state) {
+	for(var s in state) {
 		if(state[s].draw) state[s].draw();
 	}
 	// if(!this.app.looping)
