@@ -6,6 +6,9 @@ window.StateManager = require("./StateManager");
 import React from 'react';
 import ReactDOM from 'react-dom';
 import AutomatonUI from './AutomatonUI';
+import { createStore } from 'redux'
+import automaton from './reducers'
+import { Provider } from 'react-redux'
 
 window.wonderyard = new App(800, 600, {
 	
@@ -14,96 +17,44 @@ window.wonderyard = new App(800, 600, {
 
 		// Temp!
 		this.automaton = new Automaton(
-{
-  "classes": [],
-  "nbhds": [],
-  "states": [
-    {
-      "name": "Dead",
-      "color": "#000",
-      "rules": [
-        {
-          "evolve_to": {
-            "state_id": 1
+      {
+        "classes": [],
+        "nbhds": [],
+        "states": [
+          {
+            name: "Blank",
+            color: "#22232b",
+            class_list: [],
+            rules: []
           },
-          "conditions": {
-            "subexp": {
-              "operator": "AND",
-              "right_chd": {
-                "term": {
-                  "cond": {
-                    "adjacency": {
-                      "ref_to_count": {
-                        "state_ref": {
-                          "state_id": 1
-                        }
-                      },
-                      "min": 3,
-                      "max": 3
-                    }
-                  }
-                }
-              },
-              "left_chd": {
-                "term": {
-                  "bool_lit": true
-                }
-              }
-            }
-          }
-        }
-      ],
-      "class_list": []
-    },
-    {
-      "name": "Alive",
-      "color": "#FFF",
-      "rules": [
-        {
-          "evolve_to": {
-            "state_id": 0
+          {
+            name: "WireOff",
+            color: "#444855",
+            class_list: [],
+            rules: []
           },
-          "conditions": {
-            "subexp": {
-              "operator": "OR",
-              "right_chd": {
-                "term": {
-                  "cond": {
-                    "adjacency": {
-                      "ref_to_count": {
-                        "state_ref": {
-                          "state_id": 1
-                        }
-                      },
-                      "max": 1
-                    }
-                  }
-                }
-              },
-              "left_chd": {
-                "term": {
-                  "cond": {
-                    "adjacency": {
-                      "ref_to_count": {
-                        "state_ref": {
-                          "state_id": 1
-                        }
-                      },
-                      "min": 4
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      ],
-      "class_list": []
-    }
-  ]
-}
-		);
-		
+          {
+            name: "WireOn",
+            color: "#77ffff",
+            class_list: [],
+            rules: []
+          },
+          {
+            name: "WireTail",
+            color: "#60a2aa",
+            class_list: [],
+            rules: []
+          },
+          {
+            name: "WireHeat",
+            color: "#ccffff",
+            class_list: [],
+            rules: []
+          },
+        ]
+      }
+    );
+
 		for(var s in StateManager) {
 			StateManager[s].app = this;
 		}
@@ -111,8 +62,12 @@ window.wonderyard = new App(800, 600, {
 		this.setState(StateManager.select);
 		StateManager.overlay.draw();
 
+    window.store = createStore(automaton, window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__())
+
 		ReactDOM.render(
-		  <AutomatonUI data={this.automaton.data} />,
+      <Provider store={store}>
+        <AutomatonUI />
+      </Provider>,
 		  document.getElementById('root')
 		);
 	},
