@@ -5,7 +5,7 @@ window.StateManager = require("./StateManager");
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import AutomatonUI from './AutomatonUI';
+import AutomatonUI from './components/Automaton';
 import { createStore } from 'redux'
 import automaton from './reducers'
 import { Provider } from 'react-redux'
