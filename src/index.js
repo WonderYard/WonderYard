@@ -13,56 +13,10 @@ import { Provider } from 'react-redux'
 window.wonderyard = new App(800, 600, {
 	
 	init() {
-		this.grid = new Grid(128, 64);
 
-		// Temp!
-		this.automaton = new Automaton(
-      {
-        "classes": [],
-        "nbhds": [],
-        "states": [
-          {
-            name: "Blank",
-            color: "#22232b",
-            class_list: [],
-            rules: []
-          },
-          {
-            name: "WireOff",
-            color: "#444855",
-            class_list: [],
-            rules: []
-          },
-          {
-            name: "WireOn",
-            color: "#77ffff",
-            class_list: [],
-            rules: []
-          },
-          {
-            name: "WireTail",
-            color: "#60a2aa",
-            class_list: [],
-            rules: []
-          },
-          {
-            name: "WireHeat",
-            color: "#ccffff",
-            class_list: [],
-            rules: []
-          },
-        ]
-      }
-    );
-
-		for(var s in StateManager) {
-			StateManager[s].app = this;
-		}
-
-		this.setState(StateManager.select);
-		StateManager.overlay.draw();
-
-    window.store = createStore(automaton, window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__())
+    window.store = this.store = createStore(automaton, /* initialState, */
+      window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
+    )
 
 		ReactDOM.render(
       <Provider store={store}>
@@ -70,29 +24,33 @@ window.wonderyard = new App(800, 600, {
       </Provider>,
 		  document.getElementById('root')
 		);
+
+    store.subscribe(this.draw.bind(this));
 	},
 	
 	update() {
 		// Temp!
-		this.grid._data = this.automaton.evolve(this.grid);
+		//this.grid._data = this.automaton.evolve(this.grid);
 	},
 
 	draw() {
 		this.g.fillStyle = "#777777";
 		this.g.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    var currentState = this.store.getState();
+    var { grid, statesById } = currentState;
 
-		this.g.fillStyle = this.automaton.getColor(0);
-		this.g.fillRect(this.grid.x, this.grid.y, this.grid.getWidth(), this.grid.getHeight());
+		this.g.fillStyle = statesById[0].color;
+		this.g.fillRect(grid.x, grid.y, grid.scale * grid.cols, grid.scale * grid.rows);
 
-		for(var y = 0; y < this.grid.rows; y++) {
-			for(var x = 0; x < this.grid.cols; x++) {
-				if(this.grid.getCell(x, y)) this.drawCell(x, y);
+		for(var y = 0; y < grid.rows; y++) {
+			for(var x = 0; x < grid.cols; x++) {
+				if(grid.data[x + y * grid.cols] !== 0) this.drawCell(x, y, grid, statesById);
 			}
 		}
 	},
 
-	drawCell(x, y) {
-		this.g.fillStyle = this.automaton.getColor(this.grid.getCell(x, y));
-		this.g.fillRect(x * this.grid.scale + this.grid.x, y * this.grid.scale + this.grid.y, this.grid.scale, this.grid.scale);
+	drawCell(x, y, grid, statesById) {
+		this.g.fillStyle = statesById[grid.data[x + y * grid.cols]].color;
+		this.g.fillRect(x * grid.scale + grid.x, y * grid.scale + grid.y, grid.scale, grid.scale);
 	},
 });

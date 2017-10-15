@@ -37,15 +37,15 @@ class App {
 
 		// Binding mouse events to current state callbacks
 		this.canvas2.addEventListener("mousedown", function(event) {
-			if(self.currentState.onmousedown) self.currentState.onmousedown(self._getMousePos(event));
+			if(self.currentState && self.currentState.onmousedown) self.currentState.onmousedown(self._getMousePos(event));
 		});
 
 		this.canvas2.addEventListener("mousemove", function(event) {
-			if(self.currentState.onmousemove) self.currentState.onmousemove(self._getMousePos(event));
+			if(self.currentState && self.currentState.onmousemove) self.currentState.onmousemove(self._getMousePos(event));
 		});
 
 		this.canvas2.addEventListener("mouseup", function(event) {
-			if(self.currentState.onmouseup) self.currentState.onmouseup(self._getMousePos(event));
+			if(self.currentState && self.currentState.onmouseup) self.currentState.onmouseup(self._getMousePos(event));
 		});
 
 		// Lodash object extension, extends destination with sources
