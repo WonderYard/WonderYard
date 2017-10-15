@@ -10,9 +10,9 @@ const State = ({ name, color, onClick }) => (
 
 const StateListView = ({ states, statesById, onRemoveState }) => (
   <ul>
-    {states.map(function(stateId) {
+    {states.map(function(stateId, index) {
       var state = statesById[stateId];
-      return <State key={stateId} {...state} onClick={() => onRemoveState(stateId)} />
+      return <State key={stateId} {...state} onClick={() => onRemoveState(stateId, index)} />
     })}
   </ul>
 )
@@ -26,8 +26,8 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    onRemoveState: id => {
-      dispatch(removeState(id))
+    onRemoveState: (stateId, index) => {
+      dispatch(removeState(stateId, index))
     }
   }
 }
