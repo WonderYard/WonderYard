@@ -1,9 +1,12 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { addState } from '../actions'
+import { Button, Intent, IconName } from '@blueprintjs/core'
+
+
 
 function StateAdderView({ onAddState }) {
-	return <button onClick={ () => onAddState() }>+</button>
+	return <Button text="New State" rightIconName="add" intent={Intent.SUCCESS} onClick={ () => onAddState() } />
 }
 
 const mapStateToProps = state => {

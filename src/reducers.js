@@ -1,6 +1,5 @@
-
 import { AUTOMATON_DEFAULT } from './actions'
-console.log(AUTOMATON_DEFAULT)
+
 function states(_state = [], action) {
 	switch(action.type) {
 		case "ADD_STATE":
