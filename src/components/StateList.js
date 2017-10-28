@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { removeState } from '../actions'
-import { Tab2, Tabs2 } from '@blueprintjs/core'
+import { Tab2, Tabs2, Menu, MenuItem } from '@blueprintjs/core'
 
 // const State = ({ name, color, index, onClick }) => (
 //   <li>
@@ -18,17 +18,26 @@ import { Tab2, Tabs2 } from '@blueprintjs/core'
 //   </ul>
 // )
 
-const State = ({ name, color, index, onClick }) => (
-  <Tab2 id={index} title={name} />
-)
+// const StateListView = ({ states, statesById, onRemoveState }) => (
+//   <Tabs2 id="stateListView" vertical="true" defaultSelectedTabId="0">
+//     {states.map(function(stateId, index) {
+//       var state = statesById[stateId];
+//       return <Tab2 key={stateId} id={index} {...state} index={index}>
+//         {state.name}<button className="btn btn-outline-secondary btn-sm float-right" onClick={() => onRemoveState(stateId, index)}>X</button>
+//       </Tab2>
+//     })}
+//   </Tabs2>
+// )
 
 const StateListView = ({ states, statesById, onRemoveState }) => (
-  <Tabs2 id="stateListView" vertical="true" defaultSelectedTabId="0">
+  <Menu>
     {states.map(function(stateId, index) {
       var state = statesById[stateId];
-      return <Tab2 key={stateId} id={index} {...state} index={index} title={state.name} onClick={() => onRemoveState(stateId, index)} />
+      return <MenuItem key={stateId} {...state} text={state.name} index={index}>
+        
+      </MenuItem>
     })}
-  </Tabs2>
+  </Menu>
 )
 
 const mapStateToProps = state => {
