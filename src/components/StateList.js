@@ -1,10 +1,11 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { removeState } from '../actions'
+import { Button } from 'semantic-ui-react'
 
 const State = ({ name, color, index, onClick }) => (
   <li>
-    <span>{color}</span> {name} <button onClick={onClick} disabled={ index === 0 }>X</button>
+    <span>{color}</span> {name} <Button onClick={onClick} disabled={ index === 0 }>X</Button>
   </li>
 )
 
